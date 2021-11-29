@@ -155,7 +155,7 @@
                     handler($0)
                 }
 
-                guard let vc = UIApplication.shared.keyWindow?.rootViewController else {
+                guard let vc = getTopViewController() else {
                     throw Error.message("UIApplication.shared.keyWindow.rootViewController must be loaded before use `getVisitorId` method")
                 }
 
@@ -202,6 +202,18 @@
                 .components(separatedBy: .letters.inverted)
                 .joined()
         }()
+
+        private func getTopViewController(from viewController: UIViewController? = UIApplication.shared.delegate?.window??.rootViewController) -> UIViewController? {
+            if let tabBarViewController = viewController as? UITabBarController {
+                return getTopViewController(from: tabBarViewController.selectedViewController)
+            } else if let navigationController = viewController as? UINavigationController {
+                return getTopViewController(from: navigationController.visibleViewController)
+            } else if let presentedViewController = viewController?.presentedViewController {
+                return getTopViewController(from: presentedViewController)
+            } else {
+                return viewController
+            }
+        }
 
         private var webView: WKWebView? {
             didSet {
